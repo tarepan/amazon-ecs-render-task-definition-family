@@ -1,5 +1,5 @@
-name: 'Amazon ECS "Render Env in Task Definition" Action for GitHub Actions'
-description: "Inserts an environment variable into a container definition in an Amazon ECS task definition JSON file, creating a new file."
+name: 'Amazon ECS "Append suffix to family in Task Definition" Action for GitHub Actions'
+description: "Appends a suffix value to family property in an Amazon ECS task definition JSON file, creating a new file."
 branding:
   icon: "cloud"
   color: "orange"
@@ -7,14 +7,8 @@ inputs:
   task-definition:
     description: "The path to the ECS task definition JSON file"
     required: true
-  container-name:
-    description: "The name of env inserted container"
-    required: true
-  env-name:
-    description: "The name of an inserted environment variable"
-    required: true
-  env-value:
-    description: "The value of an inserted environment variable"
+  suffix:
+    description: "The value of appended suffix"
     required: true
 outputs:
   task-definition:

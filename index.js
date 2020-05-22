@@ -9,9 +9,7 @@ async function run() {
     const taskDefinitionFile = core.getInput("task-definition", {
       required: true,
     });
-    const containerName = core.getInput("container-name", { required: true });
-    const envName = core.getInput("env-name", { required: true });
-    const envValue = core.getInput("env-value", { required: true });
+    const suffixValue = core.getInput("suffix", { required: true });
 
     // Parse the task definition
     const taskDefPath = path.isAbsolute(taskDefinitionFile)
@@ -25,47 +23,13 @@ async function run() {
     //// node.js `require` read file as json
     const taskDefContents = require(taskDefPath);
 
-    // Insert the image URI
-    if (!Array.isArray(taskDefContents.containerDefinitions)) {
+    // Append suffix
+    if (!taskDefContents.family) {
       throw new Error(
-        "Invalid task definition format: containerDefinitions section is not present or is not an array"
+        "Invalid task definition format: family section should exist"
       );
     }
-    taskDefContents.containerDefinitions = taskDefContents.containerDefinitions.map(
-      (containerDef) => {
-        if (containerDef.name !== containerName) {
-          return containerDef;
-        } else {
-          // Insert env
-          if (
-            containerDef.environment &&
-            !Array.isArray(containerDef.environment)
-          ) {
-            throw new Error(
-              "Invalid task definition format: environment section is present but is not an array"
-            );
-          }
-          if (containerDef.environment) {
-            const envIndex = containerDef.environment.findIndex(
-              (pair) => pair.name === envName
-            );
-            // override
-            if (envIndex !== -1) {
-              containerDef.environment[envIndex].value = envValue;
-            }
-            // insertion
-            else {
-              containerDef.environment.push([
-                { name: envName, value: envValue },
-              ]);
-            }
-          } else {
-            containerDef.environment = [{ name: envName, value: envValue }];
-          }
-          return containerDef;
-        }
-      }
-    );
+    taskDefContents.family = `${taskDefContents.family}${suffixValue}`;
 
     // Write out a new task definition file
     var updatedTaskDefFile = tmp.fileSync({
